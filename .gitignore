@@ -1,0 +1,3 @@
+node_modules/
+# Dados pessoais (vagas, status das candidaturas e "Meus dados")
+dados/

@@ -1,0 +1,18 @@
+{
+  "name": "busca-vagas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Busca vagas remotas de desenvolvimento, pontua contra o currículo e organiza num painel local. A candidatura é sempre enviada por você.",
+  "type": "module",
+  "scripts": {
+    "buscar": "node buscar.mjs",
+    "painel": "node painel.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "playwright-core": "^1.63.0"
+  }
+}

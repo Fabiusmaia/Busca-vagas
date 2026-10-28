@@ -1,0 +1,350 @@
+{
+  "pasta_curriculos": "D:/curriculo",
+  "curriculos": {
+    "fullstack": {
+      "pt": "cv-fullstack-laravel-nextjs-node-pt-br.pdf",
+      "en": "cv-fullstack-laravel-nextjs-node-en-us.pdf"
+    },
+    "frontend": {
+      "pt": "cv-fullstack-laravel-nextjs-node-pt-br.pdf",
+      "en": "cv-fullstack-laravel-nextjs-node-en-us.pdf"
+    },
+    "backend": {
+      "pt": "cv-backend-laravel-node-pt-br.pdf",
+      "en": "cv-backend-laravel-node-en-us.pdf"
+    },
+    "mobile": {
+      "pt": "cv-mobile-rn-laravel-pt-br.pdf",
+      "en": "cv-mobile-rn-laravel-en-us.pdf"
+    },
+    "java": {
+      "pt": "cv-dev1-pt-br-java.docx",
+      "en": "cv-backend-laravel-node-en-us.pdf"
+    }
+  },
+  "fontes": {
+    "github": {
+      "ativo": true,
+      "repos": [
+        "backend-br/vagas",
+        "frontendbr/vagas",
+        "react-brasil/vagas",
+        "phpdevbr/vagas",
+        "nodejsdevbr/vagas",
+        "androiddevbr/vagas",
+        "soujava/vagas-java"
+      ],
+      "paginas": 2
+    },
+    "remotar": {
+      "ativo": true,
+      "paginas": 2,
+      "buscas": [
+        "desenvolvedor",
+        "desenvolvedora",
+        "developer",
+        "programador",
+        "engenheiro de software",
+        "software engineer",
+        "junior desenvolvedor",
+        "fullstack",
+        "frontend",
+        "backend",
+        "react native",
+        "laravel",
+        "php"
+      ]
+    },
+    "himalayas": {
+      "ativo": true,
+      "limite": 100
+    },
+    "jobicy": {
+      "ativo": true
+    },
+    "workingnomads": {
+      "ativo": true
+    },
+    "weworkremotely": {
+      "ativo": true,
+      "categorias": [
+        "remote-full-stack-programming-jobs",
+        "remote-back-end-programming-jobs",
+        "remote-front-end-programming-jobs"
+      ]
+    },
+    "remotive": {
+      "ativo": true,
+      "min_horas": 6
+    },
+    "remoteok": {
+      "ativo": true
+    },
+    "arbeitnow": {
+      "ativo": true
+    },
+    "greenhouse": {
+      "ativo": true,
+      "empresas": [
+        "vtex",
+        "gitlab"
+      ]
+    },
+    "lever": {
+      "ativo": true,
+      "empresas": [
+        "neon"
+      ]
+    },
+    "programathor": {
+      "ativo": true,
+      "paginas": 2
+    },
+    "nerdin": {
+      "ativo": true,
+      "listas": [
+        "vagas-home-office.php"
+      ],
+      "paginas": 2
+    },
+    "solides": {
+      "ativo": true,
+      "paginas": 3
+    },
+    "coodesh": {
+      "ativo": true,
+      "dias": 7
+    },
+    "recrutei": {
+      "ativo": true,
+      "paginas": 1,
+      "buscas": [
+        "desenvolvedor",
+        "programador",
+        "fullstack",
+        "php",
+        "laravel",
+        "react"
+      ]
+    },
+    "inhire": {
+      "ativo": true,
+      "empresas": [
+        "cobli",
+        "olist",
+        "creditas",
+        "cora",
+        "stone",
+        "dock",
+        "contaazul",
+        "alice",
+        "loft",
+        "ebanx",
+        "zenvia"
+      ]
+    }
+  },
+  "buscas_manuais": [
+    {
+      "site": "LinkedIn (posts)",
+      "url": "https://www.linkedin.com/search/results/content/?keywords={q}&datePosted=%22past-24h%22&sortBy=%22date_posted%22",
+      "termos": [
+        "vaga desenvolvedor remoto",
+        "vaga fullstack remoto",
+        "vaga react remoto",
+        "vaga next.js",
+        "vaga laravel",
+        "vaga php remoto",
+        "vaga node.js remoto",
+        "vaga react native",
+        "vaga desenvolvedor júnior",
+        "contratando desenvolvedor",
+        "hiring react developer remote brazil",
+        "hiring full stack developer latam"
+      ]
+    },
+    {
+      "site": "LinkedIn (vagas)",
+      "url": "https://www.linkedin.com/jobs/search/?keywords={q}&location=Brasil&f_WT=2&f_TPR=r86400&sortBy=DD",
+      "termos": [
+        "desenvolvedor fullstack",
+        "desenvolvedor react",
+        "desenvolvedor next.js",
+        "desenvolvedor laravel",
+        "desenvolvedor php",
+        "desenvolvedor node",
+        "react native",
+        "desenvolvedor júnior"
+      ]
+    },
+    {
+      "site": "Indeed",
+      "url": "https://br.indeed.com/jobs?q={q}&l=Remoto&fromage=1&sort=date",
+      "termos": [
+        "desenvolvedor fullstack",
+        "desenvolvedor react",
+        "desenvolvedor next.js",
+        "desenvolvedor laravel",
+        "desenvolvedor php",
+        "desenvolvedor node",
+        "react native",
+        "desenvolvedor júnior"
+      ]
+    },
+    {
+      "site": "Glassdoor",
+      "url": "https://www.glassdoor.com.br/Job/jobs.htm?sc.keyword={q}&fromAge=1&remoteWorkType=1",
+      "termos": [
+        "desenvolvedor fullstack",
+        "desenvolvedor react",
+        "desenvolvedor next.js",
+        "desenvolvedor laravel",
+        "desenvolvedor php",
+        "desenvolvedor node",
+        "react native",
+        "desenvolvedor júnior"
+      ]
+    },
+    {
+      "site": "Gupy",
+      "url": "https://portal.gupy.io/job-search/term={q}&workplaceTypes[]=remote",
+      "termos": [
+        "desenvolvedor fullstack",
+        "desenvolvedor react",
+        "desenvolvedor next.js",
+        "desenvolvedor laravel",
+        "desenvolvedor php",
+        "desenvolvedor node",
+        "react native",
+        "desenvolvedor júnior"
+      ]
+    }
+  ],
+  "chance": {
+    "meia_vida_horas": 48,
+    "peso_frescor": 0.5,
+    "peso_aderencia": 0.35,
+    "peso_concorrencia": 0.15
+  },
+  "automatico": {
+    "ativo": true,
+    "intervalo_min": 60,
+    "das": 8,
+    "ate": 22,
+    "notificar": true,
+    "notificar_chance_min": 60
+  },
+  "filtros": {
+    "dias_max": 14,
+    "nota_minima": 35,
+    "excluir_estagio": true,
+    "aceitar_junior": true,
+    "bonus_junior": 0,
+    "penalidade_senior": 15,
+    "localizacoes_aceitas": [
+      "worldwide",
+      "anywhere",
+      "global",
+      "latam",
+      "latin america",
+      "americas",
+      "south america",
+      "brazil",
+      "brasil",
+      "remote",
+      "remoto"
+    ],
+    "excluir_titulo": [
+      "designer",
+      "design ",
+      "ux ",
+      "ui/ux",
+      "qa",
+      "quality assurance",
+      "tester",
+      "test analyst",
+      "analista de dados",
+      "data scientist",
+      "data engineer",
+      "data analyst",
+      "cientista de dados",
+      "engenheiro de dados",
+      "machine learning",
+      "ml engineer",
+      "devops",
+      "sre",
+      "site reliability",
+      "infra",
+      "cloud engineer",
+      "security",
+      "product manager",
+      "product owner",
+      "scrum",
+      "agile coach",
+      "recruiter",
+      "recrutador",
+      "talent",
+      "sales",
+      "vendas",
+      "marketing",
+      "suporte",
+      "support",
+      "customer",
+      "account",
+      "sap ",
+      "salesforce",
+      "embedded",
+      "embarcado",
+      "firmware",
+      "game",
+      "unity",
+      "unreal",
+      "blockchain",
+      "solidity",
+      "web3"
+    ]
+  },
+  "stack": {
+    "laravel": 14,
+    "php": 10,
+    "next.js": 12,
+    "nextjs": 12,
+    "react": 10,
+    "typescript": 10,
+    "node.js": 10,
+    "nodejs": 10,
+    "node": 6,
+    "nestjs": 12,
+    "react native": 12,
+    "javascript": 6,
+    "tailwind": 5,
+    "postgresql": 5,
+    "postgres": 5,
+    "mysql": 5,
+    "redis": 4,
+    "docker": 5,
+    "github actions": 3,
+    "ci/cd": 3,
+    "jest": 4,
+    "phpunit": 4,
+    "prisma": 4,
+    "typeorm": 4,
+    "rabbitmq": 4,
+    "aws": 3,
+    "s3": 2,
+    "rest": 3,
+    "api": 2,
+    "zod": 2,
+    "sql": 3
+  },
+  "ia": {
+    "ativo": true,
+    "modelo": "claude-opus-5-5",
+    "esforco": "medium",
+    "nota_minima_para_analisar": 50,
+    "max_por_execucao": 15
+  },
+  "painel": {
+    "porta": 4321
+  }
+}

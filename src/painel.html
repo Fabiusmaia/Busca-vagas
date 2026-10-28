@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Busca de Vagas</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f3f0;
+  --surface-1: #fcfcfb;
+  --surface-2: #f0efec;
+  --border: #e2e0da;
+  --grid: #e8e6e1;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #7a7974;
+  --series-1: #2a78d6;
+  --series-1-wash: rgba(42, 120, 214, 0.10);
+  --track: #cde2fb;
+  --good: #0ca30c; --warning: #fab219; --serious: #ec835a; --critical: #d03b3b;
+  --good-text: #006300;
+  --link: #1c5cab;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: #121211; --surface-1: #1a1a19; --surface-2: #232321; --border: #33332f; --grid: #2c2c29;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+    --series-1: #3987e5; --series-1-wash: rgba(57, 135, 229, 0.14); --track: #184f95;
+    --good-text: #4cc94c; --link: #86b6ef;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211; --surface-1: #1a1a19; --surface-2: #232321; --border: #33332f; --grid: #2c2c29;
+  --text-primary: #ffffff; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+  --series-1: #3987e5; --series-1-wash: rgba(57, 135, 229, 0.14); --track: #184f95;
+  --good-text: #4cc94c; --link: #86b6ef;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text-primary); font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--link); }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 1px solid var(--border); background: var(--surface-1); border-radius: 8px; padding: 6px 12px; }
+button:hover { background: var(--surface-2); }
+button.primario { background: var(--series-1); border-color: var(--series-1); color: #fff; font-weight: 600; }
+button:disabled { opacity: .55; cursor: default; }
+select, input[type=search], input[type=number] { border: 1px solid var(--border); background: var(--surface-1); border-radius: 8px; padding: 6px 10px; }
+
+header { position: sticky; top: 0; z-index: 5; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+.topo { max-width: 1200px; margin: 0 auto; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.topo h1 { font-size: 18px; margin: 0 12px 0 0; }
+.topo .info { color: var(--text-secondary); font-size: 13px; flex: 1; min-width: 160px; }
+.abas { max-width: 1200px; margin: 0 auto; padding: 0 16px; display: flex; gap: 4px; overflow-x: auto; }
+.abas button { border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 8px 14px; color: var(--text-secondary); }
+.abas button[aria-selected="true"] { color: var(--text-primary); border-bottom-color: var(--series-1); font-weight: 600; }
+main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.filtros input[type=search] { flex: 1; min-width: 180px; }
+.contagem { color: var(--text-secondary); font-size: 13px; margin: 0 0 8px; }
+
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; display: grid; grid-template-columns: 76px 1fr; gap: 14px; }
+.chance { text-align: center; }
+.chance .num { font-size: 26px; font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.chance .rot { font-size: 11px; color: var(--text-muted); }
+.meter { height: 6px; background: var(--track); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+.meter > i { display: block; height: 100%; background: var(--series-1); border-radius: 0 3px 3px 0; }
+.titulo { font-weight: 600; font-size: 15px; }
+.meta { color: var(--text-secondary); font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 2px; }
+.fresca { color: var(--good-text); font-weight: 600; }
+.fresca::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--good); margin-right: 5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.chip { font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border); }
+.motivos { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.ia { margin-top: 8px; padding: 8px 10px; border-left: 3px solid var(--series-1); background: var(--series-1-wash); border-radius: 0 8px 8px 0; font-size: 13px; }
+.acoes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; align-items: center; }
+.acoes a.botao { text-decoration: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; color: var(--text-primary); background: var(--surface-1); }
+.acoes a.botao:hover { background: var(--surface-2); }
+details.desc { margin-top: 8px; font-size: 13px; color: var(--text-secondary); }
+details.desc summary { cursor: pointer; color: var(--text-muted); }
+details.desc div { white-space: pre-wrap; max-height: 260px; overflow: auto; margin-top: 6px; }
+
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.status.s-retornou::before, .status.s-entrevista::before, .status.s-proposta::before { background: var(--good); }
+.status.s-aplicada::before { background: var(--series-1); }
+.status.s-recusada::before { background: var(--critical); }
+.status.s-sem_retorno::before { background: var(--serious); }
+.status.s-interessante::before { background: var(--warning); }
+
+table { width: 100%; border-collapse: collapse; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { font-size: 12px; color: var(--text-secondary); font-weight: 600; background: var(--surface-2); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.rapido { display: flex; flex-wrap: wrap; gap: 4px; }
+.rapido button { padding: 3px 8px; font-size: 12px; }
+.alerta { color: var(--text-secondary); font-size: 12px; }
+.alerta::before { content: "⚠ "; color: var(--serious); }
+.tabela-rolagem { overflow-x: auto; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.kpi { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.kpi .rot { font-size: 12px; color: var(--text-secondary); }
+.kpi .val { font-size: 26px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.kpi.hero .val { font-size: 48px; line-height: 1.05; }
+.kpi .sub { font-size: 12px; color: var(--text-muted); }
+.graficos { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; }
+.grafico { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px; min-width: 0; }
+.grafico h3 { margin: 0; font-size: 14px; }
+.grafico .sub { margin: 2px 0 12px; font-size: 12px; color: var(--text-muted); }
+.hbar { display: grid; grid-template-columns: minmax(70px, max-content) 1fr minmax(84px, max-content); gap: 8px 10px; align-items: center; }
+.hbar .rot { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.hbar .trilho { height: 20px; position: relative; border-left: 1px solid var(--grid); }
+.hbar .barra { height: 100%; background: var(--series-1); border-radius: 0 4px 4px 0; min-width: 2px; }
+.hbar .val { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.hbar .val small { color: var(--text-muted); }
+.hbar .alvo { display: contents; }
+.vazio { color: var(--text-muted); font-size: 13px; padding: 20px 0; text-align: center; }
+details.tabela { margin-top: 10px; font-size: 12px; }
+details.tabela summary { cursor: pointer; color: var(--text-muted); }
+details.tabela table { margin-top: 6px; font-size: 12px; }
+svg text { fill: var(--text-muted); font-size: 11px; }
+#tooltip { position: fixed; pointer-events: none; z-index: 20; background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.15); display: none; max-width: 260px; }
+#log { white-space: pre-wrap; font: 12px/1.4 ui-monospace, Consolas, monospace; background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 12px; display: none; max-height: 220px; overflow: auto; }
+.oculto { display: none !important; }
+.rot-campo { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 3px; }
+#formManual input:not([type=checkbox]), #formManual textarea { width: 100%; border: 1px solid var(--border); background: var(--surface-1); border-radius: 8px; padding: 6px 10px; font: inherit; color: inherit; }
+@media (max-width: 560px) {
+  .card { grid-template-columns: 1fr; }
+  .chance { text-align: left; display: flex; gap: 10px; align-items: baseline; }
+  .chance .meter { flex: 1; }
+  .graficos { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="topo">
+    <h1>Busca de Vagas</h1>
+    <span class="info" id="info">carregando…</span>
+    <label title="Analisa as melhores vagas novas com Claude (precisa de ANTHROPIC_API_KEY)"><input type="checkbox" id="comIA" checked> com IA</label>
+    <button class="primario" id="btnBuscar">Buscar agora</button>
+    <button id="btnNotif" title="Enviar uma notificação de teste no Windows">🔔 Testar aviso</button>
+    <button id="btnTema" title="Alternar tema claro/escuro">◐</button>
+  </div>
+  <nav class="abas" role="tablist">
+    <button role="tab" data-aba="vagas" aria-selected="true">Vagas</button>
+    <button role="tab" data-aba="candidaturas" aria-selected="false">Candidaturas</button>
+    <button role="tab" data-aba="resultados" aria-selected="false">Resultados</button>
+    <button role="tab" data-aba="linkedin" aria-selected="false">Outros sites</button>
+    <button role="tab" data-aba="perfil" aria-selected="false">Meus dados</button>
+  </nav>
+</header>
+
+<main>
+  <div id="log"></div>
+
+  <section id="aba-vagas">
+    <div class="filtros">
+      <input type="search" id="fTexto" placeholder="Buscar por título, empresa, tecnologia…">
+      <select id="fIdade">
+        <option value="24">Últimas 24h</option>
+        <option value="72">Últimos 3 dias</option>
+        <option value="168" selected>Últimos 7 dias</option>
+        <option value="99999">Qualquer data</option>
+      </select>
+      <select id="fPapel"><option value="">Todos os papéis</option><option>fullstack</option><option>frontend</option><option>backend</option><option>mobile</option><option>java</option></select>
+      <select id="fStatus"><option value="abertas">Não aplicadas</option><option value="">Todos os status</option></select>
+      <select id="fOrdem">
+        <option value="chance">Ordenar por chance</option>
+        <option value="recente">Mais recentes</option>
+        <option value="aderencia">Maior aderência</option>
+      </select>
+    </div>
+    <p class="contagem" id="contagem"></p>
+    <div id="lista"></div>
+  </section>
+
+  <section id="aba-candidaturas" class="oculto">
+    <p class="contagem">Marque aqui o que aconteceu com cada candidatura. Isso alimenta a aba Resultados.</p>
+    <div class="tabela-rolagem"><table id="tabCand"></table></div>
+  </section>
+
+  <section id="aba-resultados" class="oculto">
+    <div class="kpis" id="kpis"></div>
+    <div class="graficos" id="graficos"></div>
+  </section>
+
+  <section id="aba-linkedin" class="oculto">
+    <div class="grafico" style="margin-bottom:12px">
+      <h3>Buscas prontas — remoto, últimas 24h, mais recentes primeiro</h3>
+      <p class="sub">Sites sem API pública (LinkedIn, Indeed, Glassdoor, Gupy): o painel só abre a busca já filtrada; você navega normalmente. Nada é raspado desses sites.</p>
+      <div id="lkLinks"></div>
+      <p class="sub" style="margin:10px 0 0">Para mudar termos ou sites, edite <code>buscas_manuais</code> no config.json.</p>
+    </div>
+    <form class="grafico" id="formManual">
+      <h3>Adicionar vaga encontrada nesses sites</h3>
+      <p class="sub">Copie o link e o texto da vaga (ou do post). Ela entra no painel com nota e chance, como as outras, e aparece em Candidaturas e Resultados.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+        <label><span class="rot-campo">Site</span><select name="fonte" style="width:100%">
+          <option>LinkedIn (post)</option><option>LinkedIn (vaga)</option><option>Indeed</option><option>Glassdoor</option><option>Gupy</option><option>Solides</option><option>Outro</option></select></label>
+        <label><span class="rot-campo">Situação</span><select name="status" style="width:100%">
+          <option value="nova">Ainda não apliquei</option><option value="aplicada">Já apliquei</option><option value="retornou">Já me chamaram</option><option value="entrevista">Entrevista marcada</option></select></label>
+        <label><span class="rot-campo">Link da vaga ou post *</span><input name="url" required placeholder="https://…"></label>
+        <label><span class="rot-campo">Título da vaga</span><input name="titulo" placeholder="ex.: Dev Fullstack Pleno (React/Node)"></label>
+        <label><span class="rot-campo">Empresa</span><input name="empresa"></label>
+        <label><span class="rot-campo">Postado há quantas horas?</span><input name="horas" type="number" min="0" value="1"></label>
+      </div>
+      <label style="display:block;margin-top:10px"><span class="rot-campo">Texto do post *</span>
+        <textarea name="texto" required rows="7" placeholder="Cole aqui o texto da publicação (requisitos, stack, se é remoto, como se candidatar)"></textarea></label>
+      <label style="display:inline-flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" name="remoto" checked> É remota</label>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center"><button class="primario" type="submit">Adicionar ao painel</button><span id="manualStatus" style="font-size:13px;color:var(--text-secondary)"></span></div>
+    </form>
+  </section>
+
+  <section id="aba-perfil" class="oculto">
+    <div class="grafico" style="margin-bottom:12px">
+      <h3>Preenchimento de formulários</h3>
+      <p class="sub" style="margin-bottom:8px">
+        1. Preencha seus dados abaixo e clique em <b>Salvar</b>.<br>
+        2. Arraste o botão abaixo para a <b>barra de favoritos</b> do navegador (Ctrl+Shift+B mostra a barra).<br>
+        3. Na página do formulário da vaga, clique no favorito: os campos vazios que ele reconhecer ficam preenchidos e com contorno verde.
+        Ele <b>nunca envia</b> nada — confira e clique em enviar você mesmo.<br>
+        Sempre que mudar seus dados, salve e arraste o botão de novo (ele guarda uma cópia dos dados).
+      </p>
+      <a id="bookmarklet" class="botao" style="display:inline-block;text-decoration:none;background:var(--series-1);color:#fff;border-radius:8px;padding:8px 14px;font-weight:600" href="#" onclick="event.preventDefault(); alert('Arraste este botão para a barra de favoritos.');">⇢ Preencher formulário</a>
+      <span class="alerta-off" id="bmInfo" style="color:var(--text-muted);font-size:12px;margin-left:8px"></span>
+    </div>
+    <form id="formPerfil"></form>
+    <div style="position:sticky;bottom:0;padding:10px 0;background:var(--bg);display:flex;gap:10px;align-items:center">
+      <button class="primario" id="btnSalvarPerfil">Salvar</button>
+      <span id="perfilStatus" style="color:var(--text-muted);font-size:13px"></span>
+    </div>
+  </section>
+</main>
+<div id="tooltip" role="tooltip"></div>
+
+<script type="module">
+import { kitCandidatura, regrasDoPerfil, montarPrompt, textosDoKit } from "/compartilhado.mjs";
+const ROTULO = { nova: "Nova", interessante: "Interessante", aplicada: "Aplicada", retornou: "Retornou", entrevista: "Entrevista", proposta: "Proposta", recusada: "Recusada", sem_retorno: "Sem retorno", descartada: "Descartada" };
+let D = { vagas: [], status: [], respostas: [], pos_aplicacao: [] };
+let aba = "vagas";
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const pct = (x) => `${Math.round(x * 100)}%`;
+function idade(h) {
+  if (h < 1) return "há menos de 1h";
+  if (h < 48) return `há ${Math.round(h)}h`;
+  return `há ${Math.round(h / 24)} dias`;
+}
+function diasDesde(iso) { return iso ? (Date.now() - new Date(iso).getTime()) / 86400000 : null; }
+
+// ---------------------------------------------------------------- tema
+const temaSalvo = (() => { try { return localStorage.getItem("tema"); } catch { return null; } })();
+if (temaSalvo) document.documentElement.dataset.theme = temaSalvo;
+$("#btnTema").onclick = () => {
+  const escuro = matchMedia("(prefers-color-scheme: dark)").matches;
+  const atual = document.documentElement.dataset.theme || (escuro ? "dark" : "light");
+  const novo = atual === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = novo;
+  try { localStorage.setItem("tema", novo); } catch {}
+};
+
+// ---------------------------------------------------------------- abas
+document.querySelectorAll("[data-aba]").forEach((b) => b.onclick = () => {
+  aba = b.dataset.aba;
+  document.querySelectorAll("[data-aba]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+  for (const n of ["vagas", "candidaturas", "resultados", "linkedin", "perfil"]) $(`#aba-${n}`).classList.toggle("oculto", n !== aba);
+  if (aba === "perfil") carregarPerfil();
+  else if (aba === "linkedin") carregarLinkedin();
+  else render();
+});
+
+// ---------------------------------------------------------------- dados
+async function carregar() {
+  const r = await fetch("/api/vagas");
+  D = await r.json();
+  const ult = D.ultima_busca ? new Date(D.ultima_busca).toLocaleString("pt-BR") : "nunca";
+  const erros = D.erros?.length ? ` · ${D.erros.length} fonte(s) com erro` : "";
+  const prox = D.proxima_busca ? ` · próxima automática ${new Date(D.proxima_busca).toLocaleString("pt-BR", { weekday: "short", hour: "2-digit", minute: "2-digit" })}` : "";
+  $("#info").textContent = `Última busca: ${ult}${erros}${prox}`;
+  const caixaIA = $("#comIA");
+  if (!caixaIA.dataset.iniciada) {
+    caixaIA.dataset.iniciada = "1";
+    caixaIA.checked = D.ia_configurada;
+    caixaIA.disabled = !D.ia_configurada;
+    caixaIA.parentElement.title = D.ia_configurada
+      ? "Analisa as melhores vagas novas com Claude"
+      : "IA opcional desligada: defina ANTHROPIC_API_KEY antes de abrir o painel para ativar notas e cartas";
+  }
+  $("#btnBuscar").disabled = D.buscando;
+  $("#btnBuscar").textContent = D.buscando ? "Buscando…" : "Buscar agora";
+  const log = $("#log");
+  if (D.buscando || (D.log?.length && log.dataset.visto !== String(D.log.length))) {
+    log.style.display = "block";
+    log.textContent = D.log.join("\n");
+    log.scrollTop = log.scrollHeight;
+  }
+  if (!D.buscando && D.log?.length) log.dataset.visto = String(D.log.length);
+  render();
+  if (D.buscando) setTimeout(carregar, 1500);
+}
+
+async function mudarStatus(id, status) {
+  await fetch(`/api/vagas/${encodeURIComponent(id)}/status`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+  await carregar();
+}
+
+$("#btnNotif").onclick = async () => {
+  const r = await (await fetch("/api/testar-notificacao", { method: "POST" })).json();
+  $("#btnNotif").textContent = r.ok ? "🔔 Enviado ✓" : "🔔 Falhou";
+  setTimeout(() => ($("#btnNotif").textContent = "🔔 Testar aviso"), 3000);
+  if (!r.ok) alert("O Windows recusou a notificação. Verifique se o modo Não Perturbe está desligado.");
+};
+
+$("#btnBuscar").onclick = async () => {
+  await fetch(`/api/buscar?ia=${$("#comIA").checked ? 1 : 0}`, { method: "POST" });
+  $("#log").style.display = "block";
+  carregar();
+};
+for (const id of ["#fTexto", "#fIdade", "#fPapel", "#fStatus", "#fOrdem"]) $(id).addEventListener("input", () => render());
+
+function render() {
+  if (aba === "vagas") renderVagas();
+  else if (aba === "candidaturas") renderCandidaturas();
+  else if (aba === "resultados") renderResultados();
+}
+
+// ---------------------------------------------------------------- aba Vagas
+function seletorStatus(v) {
+  return `<select data-status="${esc(v.id)}" aria-label="Status">${D.status.map((s) => `<option value="${s}" ${s === v.status ? "selected" : ""}>${ROTULO[s]}</option>`).join("")}</select>`;
+}
+
+function renderVagas() {
+  const texto = $("#fTexto").value.trim().toLowerCase();
+  const maxH = Number($("#fIdade").value);
+  const papel = $("#fPapel").value;
+  const st = $("#fStatus").value;
+  const ordem = $("#fOrdem").value;
+  let vs = D.vagas.filter((v) => {
+    if (v.horas > maxH) return false;
+    if (papel && v.papel !== papel) return false;
+    if (st === "abertas" && !["nova", "interessante"].includes(v.status)) return false;
+    if (texto && !`${v.titulo} ${v.empresa} ${v.stack?.join(" ")} ${v.fonte}`.toLowerCase().includes(texto)) return false;
+    return true;
+  });
+  if (ordem === "recente") vs.sort((a, b) => a.horas - b.horas);
+  else if (ordem === "aderencia") vs.sort((a, b) => b.aderencia - a.aderencia);
+  const frescas = vs.filter((v) => v.horas < 24).length;
+  $("#contagem").textContent = `${vs.length} vagas · ${frescas} publicadas nas últimas 24h`;
+  if (!vs.length) {
+    $("#lista").innerHTML = `<p class="vazio">${D.vagas.length ? "Nenhuma vaga com esses filtros. Tente aumentar o período." : "Nenhuma vaga ainda. Clique em “Buscar agora”."}</p>`;
+    return;
+  }
+  $("#lista").innerHTML = vs.slice(0, 200).map((v) => `
+    <article class="card">
+      <div class="chance" title="Frescor ${v.frescor} · aderência ${v.aderencia} · concorrência ${v.concorrencia}">
+        <div class="num">${v.chance}%</div>
+        <div class="rot">chance</div>
+        <div class="meter"><i style="width:${v.chance}%"></i></div>
+      </div>
+      <div>
+        <div class="titulo">${esc(v.titulo)}</div>
+        <div class="meta">
+          <span class="${v.horas < 24 ? "fresca" : ""}">${v.horas < 24 ? "Fresca · " : ""}${idade(v.horas)}</span>
+          ${v.empresa ? `<span>${esc(v.empresa)}</span>` : ""}
+          <span>${esc(v.fonte)}</span>
+          <span>${esc(v.papel)} · ${v.idioma === "pt" ? "PT" : "EN"}</span>
+          ${v.local ? `<span>${esc(v.local)}</span>` : ""}
+          <span>aderência ${v.aderencia}</span>
+          <span class="status s-${v.status}">${ROTULO[v.status]}</span>
+        </div>
+        ${v.stack?.length ? `<div class="chips">${v.stack.map((s) => `<span class="chip">${esc(s)}</span>`).join("")}</div>` : ""}
+        <div class="motivos">${esc(v.motivos?.join(" · "))}</div>
+        ${v.ia && !v.ia.erro ? `<div class="ia"><b>IA: ${v.ia.nota}/10</b> — ${esc(v.ia.resumo)}${v.ia.lacunas?.length ? `<br><span style="color:var(--text-muted)">Lacunas: ${esc(v.ia.lacunas.join("; "))}</span>` : ""}</div>` : ""}
+        <div class="acoes">
+          ${["nova", "interessante"].includes(v.status) ? `<button class="primario" data-aplicar="${esc(v.id)}" title="Abre no Edge, chega ao formulário, preenche o que reconhece e mostra o kit. Você confere e envia.">Aplicar</button>` : ""}
+          <a class="botao" href="${esc(v.url)}" target="_blank" rel="noopener">Abrir vaga ↗</a>
+          ${v.url_candidatura ? `<a class="botao" href="${esc(v.url_candidatura)}" target="_blank" rel="noopener">Página de candidatura ↗</a>` : ""}
+          ${v.curriculo ? `<a class="botao" href="/cv/${encodeURIComponent(v.curriculo)}" target="_blank" title="${esc(v.curriculo)}">Currículo indicado</a>` : ""}
+          ${v.ia?.carta ? `<button data-carta="${esc(v.id)}">Copiar carta</button>` : ""}
+          <button data-chat="${esc(v.id)}" title="Copia um prompt pronto e abre o ChatGPT; é só colar (Ctrl+V)">Perguntar no ChatGPT</button>
+          ${["nova", "interessante"].includes(v.status) ? `<button data-rapido="${esc(v.id)}" data-s="aplicada">Marquei como aplicada</button>` : ""}
+          ${seletorStatus(v)}
+        </div>
+        <details class="desc"><summary>Descrição</summary><div>${esc(v.descricao)}</div></details>
+      </div>
+    </article>`).join("");
+}
+
+document.addEventListener("change", (e) => {
+  const id = e.target.dataset?.status;
+  if (id) mudarStatus(id, e.target.value);
+});
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.rapido) mudarStatus(t.dataset.rapido, t.dataset.s);
+  if (t.dataset.aplicar) {
+    t.disabled = true;
+    t.textContent = "Abrindo no Edge…";
+    const r = await (await fetch(`/api/vagas/${encodeURIComponent(t.dataset.aplicar)}/aplicar`, { method: "POST" })).json();
+    t.disabled = false;
+    if (r.erro) {
+      t.textContent = "Aplicar";
+      alert(`Não consegui abrir: ${r.erro}\nUse "Abrir vaga" e o favorito "Preencher formulário".`);
+      return;
+    }
+    t.textContent = r.campos ? "Aberta no Edge ✓" : "Aberta (sem formulário ainda)";
+    setTimeout(() => carregar(), 1500);
+    return;
+  }
+  if (t.dataset.chat) {
+    const v = D.vagas.find((x) => x.id === t.dataset.chat);
+    const ingles = v.idioma === "en";
+    const pergunta = window.prompt(
+      "Qual pergunta do formulário você quer responder? (Cancelar = só a carta)",
+      ingles ? "Why do you want to work at this company?" : "Por que você quer trabalhar nesta empresa?",
+    );
+    if (pergunta === null && !confirm("Gerar só a carta de apresentação?")) return;
+    const p = (await (await fetch("/api/perfil")).json()).valores;
+    await navigator.clipboard.writeText(montarPrompt(v, p, pergunta));
+    window.open("https://chatgpt.com/", "_blank", "noopener");
+    t.textContent = "Prompt copiado ✓ cole no ChatGPT";
+    setTimeout(() => (t.textContent = "Perguntar no ChatGPT"), 4000);
+  }
+  if (t.dataset.carta) {
+    const v = D.vagas.find((x) => x.id === t.dataset.carta);
+    await navigator.clipboard.writeText(v.ia.carta);
+    t.textContent = "Copiada ✓";
+    setTimeout(() => (t.textContent = "Copiar carta"), 1500);
+  }
+});
+
+// ---------------------------------------------------------------- aba Candidaturas
+function renderCandidaturas() {
+  const vs = D.vagas.filter((v) => D.pos_aplicacao.includes(v.status)).sort((a, b) => new Date(b.aplicada_em) - new Date(a.aplicada_em));
+  if (!vs.length) {
+    $("#tabCand").innerHTML = `<tr><td class="vazio">Nenhuma candidatura ainda. Na aba Vagas, use “Marquei como aplicada” depois de se candidatar.</td></tr>`;
+    return;
+  }
+  const botoes = ["retornou", "entrevista", "proposta", "recusada", "sem_retorno"];
+  $("#tabCand").innerHTML = `
+    <thead><tr><th>Vaga</th><th>Status</th><th class="num">Aplicada há</th><th class="num">Idade ao aplicar</th><th class="num">Chance</th><th>Marcar resultado</th></tr></thead>
+    <tbody>${vs.map((v) => {
+      const dias = diasDesde(v.aplicada_em);
+      const esperando = v.status === "aplicada" && dias > 14;
+      return `<tr>
+        <td><a href="${esc(v.url)}" target="_blank" rel="noopener">${esc(v.titulo)}</a><br><span class="alerta-off" style="color:var(--text-muted);font-size:12px">${esc(v.empresa || v.fonte)}</span>
+          ${esperando ? `<div class="alerta">Sem resposta há ${Math.floor(dias)} dias — provavelmente “Sem retorno”.</div>` : ""}</td>
+        <td><span class="status s-${v.status}">${ROTULO[v.status]}</span></td>
+        <td class="num">${dias == null ? "—" : `${Math.floor(dias)}d`}</td>
+        <td class="num">${v.horas_ao_aplicar == null ? "—" : idade(v.horas_ao_aplicar).replace("há ", "")}</td>
+        <td class="num">${v.chance_ao_aplicar ?? "—"}${v.chance_ao_aplicar != null ? "%" : ""}</td>
+        <td><div class="rapido">${botoes.map((s) => `<button data-rapido="${esc(v.id)}" data-s="${s}" ${v.status === s ? "disabled" : ""}>${ROTULO[s]}</button>`).join("")}</div></td>
+      </tr>`;
+    }).join("")}</tbody>`;
+}
+
+// ---------------------------------------------------------------- aba Resultados
+const tooltip = $("#tooltip");
+function mostrarTip(e, html) {
+  tooltip.innerHTML = html;
+  tooltip.style.display = "block";
+  const x = Math.min(e.clientX + 14, innerWidth - tooltip.offsetWidth - 8);
+  const y = Math.min(e.clientY + 14, innerHeight - tooltip.offsetHeight - 8);
+  tooltip.style.left = `${x}px`;
+  tooltip.style.top = `${y}px`;
+}
+function esconderTip() { tooltip.style.display = "none"; }
+
+/** Agrupa candidaturas e calcula a taxa de retorno de cada grupo. */
+function taxaPor(apps, chave, ordem) {
+  const g = new Map(ordem.map((k) => [k, { n: 0, r: 0 }]));
+  for (const v of apps) {
+    const k = chave(v);
+    if (k == null) continue;
+    if (!g.has(k)) g.set(k, { n: 0, r: 0 });
+    const o = g.get(k);
+    o.n++;
+    if (D.respostas.includes(v.status)) o.r++;
+  }
+  return [...g].filter(([, o]) => o.n > 0).map(([rotulo, o]) => ({ rotulo, valor: o.r / o.n, n: o.n, r: o.r }));
+}
+
+function tabelaHTML(cab, linhas) {
+  return `<details class="tabela"><summary>Ver tabela</summary><table><thead><tr>${cab.map((c, i) => `<th class="${i ? "num" : ""}">${c}</th>`).join("")}</tr></thead><tbody>${linhas.map((l) => `<tr>${l.map((c, i) => `<td class="${i ? "num" : ""}">${c}</td>`).join("")}</tr>`).join("")}</tbody></table></details>`;
+}
+
+/** Barras horizontais de série única (taxa 0-1 ou contagem). Rótulo do valor na ponta. */
+function graficoBarras(titulo, sub, linhas, { modo = "taxa", vazio = "Sem dados ainda." } = {}) {
+  if (!linhas.length) return `<section class="grafico"><h3>${titulo}</h3><p class="sub">${sub}</p><p class="vazio">${vazio}</p></section>`;
+  const max = modo === "taxa" ? 1 : Math.max(...linhas.map((l) => l.valor), 1);
+  const corpo = linhas.map((l, i) => {
+    const w = (l.valor / max) * 100;
+    const val = modo === "taxa" ? `${pct(l.valor)} <small>(${l.r}/${l.n})</small>` : `${l.valor}${l.extra ? ` <small>${l.extra}</small>` : ""}`;
+    const tip = modo === "taxa" ? `<b>${esc(l.rotulo)}</b><br>${l.r} retorno(s) em ${l.n} candidatura(s) · ${pct(l.valor)}${l.n < 5 ? "<br><i>Poucos dados: leia com cautela</i>" : ""}` : `<b>${esc(l.rotulo)}</b><br>${l.valor}${l.extra ? ` ${l.extra}` : ""}`;
+    return `<div class="rot" title="${esc(l.rotulo)}">${esc(l.rotulo)}</div>
+      <div class="trilho" data-tip="${esc(tip)}"><div class="barra" style="width:${Math.max(w, 0.5)}%"></div></div>
+      <div class="val">${val}</div>`;
+  }).join("");
+  const tabela = modo === "taxa"
+    ? tabelaHTML(["Grupo", "Candidaturas", "Retornos", "Taxa"], linhas.map((l) => [esc(l.rotulo), l.n, l.r, pct(l.valor)]))
+    : tabelaHTML(["Etapa", "Quantidade"], linhas.map((l) => [esc(l.rotulo), l.valor]));
+  return `<section class="grafico"><h3>${titulo}</h3><p class="sub">${sub}</p><div class="hbar">${corpo}</div>${tabela}</section>`;
+}
+
+/** Colunas por dia (últimos 30 dias), série única. */
+function graficoDias(titulo, sub, apps) {
+  const dias = [];
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  for (let i = 29; i >= 0; i--) { const d = new Date(hoje); d.setDate(d.getDate() - i); dias.push({ d, n: 0 }); }
+  for (const v of apps) {
+    const a = new Date(v.aplicada_em); a.setHours(0, 0, 0, 0);
+    const item = dias.find((x) => x.d.getTime() === a.getTime());
+    if (item) item.n++;
+  }
+  const total = dias.reduce((s, x) => s + x.n, 0);
+  if (!total) return `<section class="grafico"><h3>${titulo}</h3><p class="sub">${sub}</p><p class="vazio">Nenhuma candidatura nos últimos 30 dias.</p></section>`;
+  const W = 600, H = 180, mx = 28, my = 14, base = H - 22;
+  const max = Math.max(...dias.map((x) => x.n));
+  const passo = Math.max(1, Math.ceil(max / 4));
+  const topo = Math.ceil(max / passo) * passo;
+  const bw = Math.min(14, (W - mx - 4) / dias.length - 3);
+  const slot = (W - mx - 4) / dias.length;
+  let svg = "";
+  for (let t = 0; t <= topo; t += passo) {
+    const y = base - (t / topo) * (base - my);
+    svg += `<line x1="${mx}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--grid)" stroke-width="1"/><text x="${mx - 6}" y="${y + 4}" text-anchor="end">${t}</text>`;
+  }
+  dias.forEach((x, i) => {
+    const cx = mx + slot * i + slot / 2;
+    const h = (x.n / topo) * (base - my);
+    if (x.n) {
+      const r = Math.min(4, h, bw / 2), x0 = cx - bw / 2, y0 = base - h;
+      svg += `<path d="M${x0},${base} V${y0 + r} Q${x0},${y0} ${x0 + r},${y0} H${x0 + bw - r} Q${x0 + bw},${y0} ${x0 + bw},${y0 + r} V${base} Z" fill="var(--series-1)"/>`;
+    }
+    const rot = x.d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    svg += `<rect x="${cx - slot / 2}" y="${my}" width="${slot}" height="${base - my}" fill="transparent" data-tip="${esc(`<b>${rot}</b><br>${x.n} candidatura(s)`)}"/>`;
+    if (i % 5 === 4 || i === 29) svg += `<text x="${cx}" y="${H - 6}" text-anchor="middle">${rot}</text>`;
+  });
+  svg += `<line x1="${mx}" x2="${W}" y1="${base}" y2="${base}" stroke="var(--text-muted)" stroke-width="1"/>`;
+  const tabela = tabelaHTML(["Dia", "Candidaturas"], dias.filter((x) => x.n).map((x) => [x.d.toLocaleDateString("pt-BR"), x.n]));
+  return `<section class="grafico" style="grid-column: 1 / -1"><h3>${titulo}</h3><p class="sub">${sub}</p><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${titulo}">${svg}</svg>${tabela}</section>`;
+}
+
+function renderResultados() {
+  const apps = D.vagas.filter((v) => D.pos_aplicacao.includes(v.status) && v.aplicada_em);
+  const resp = apps.filter((v) => D.respostas.includes(v.status));
+  const positivos = apps.filter((v) => ["retornou", "entrevista", "proposta"].includes(v.status));
+  const entrevistas = apps.filter((v) => ["entrevista", "proposta"].includes(v.status));
+  const aguardando = apps.filter((v) => v.status === "aplicada");
+  const tempos = resp.filter((v) => v.retorno_em).map((v) => (new Date(v.retorno_em) - new Date(v.aplicada_em)) / 86400000);
+  const tempoMedio = tempos.length ? tempos.reduce((a, b) => a + b, 0) / tempos.length : null;
+  const encontradas = D.vagas.filter((v) => !v.descartada);
+
+  $("#kpis").innerHTML = `
+    <div class="kpi hero"><div class="rot">Taxa de retorno</div><div class="val">${apps.length ? pct(resp.length / apps.length) : "—"}</div><div class="sub">${resp.length} de ${apps.length} candidaturas responderam</div></div>
+    <div class="kpi"><div class="rot">Candidaturas</div><div class="val">${apps.length}</div><div class="sub">${aguardando.length} aguardando resposta</div></div>
+    <div class="kpi"><div class="rot">Retornos positivos</div><div class="val">${positivos.length}</div><div class="sub">retornou, entrevista ou proposta</div></div>
+    <div class="kpi"><div class="rot">Entrevistas</div><div class="val">${entrevistas.length}</div><div class="sub">${apps.length ? pct(entrevistas.length / apps.length) : "—"} das candidaturas</div></div>
+    <div class="kpi"><div class="rot">Tempo médio até retorno</div><div class="val">${tempoMedio == null ? "—" : `${tempoMedio.toFixed(1)}d`}</div><div class="sub">desde a candidatura</div></div>
+    <div class="kpi"><div class="rot">Vagas no radar</div><div class="val">${encontradas.length}</div><div class="sub">${encontradas.filter((v) => v.horas < 24).length} frescas (&lt; 24h)</div></div>`;
+
+  const vazioApps = "Marque candidaturas como aplicadas e depois o resultado delas para ver este gráfico.";
+  const faixaIdade = (v) => v.horas_ao_aplicar == null ? null : v.horas_ao_aplicar < 24 ? "< 24h" : v.horas_ao_aplicar < 72 ? "1 a 3 dias" : v.horas_ao_aplicar < 168 ? "3 a 7 dias" : "> 7 dias";
+  const faixaChance = (v) => v.chance_ao_aplicar == null ? null : v.chance_ao_aplicar >= 75 ? "75–100%" : v.chance_ao_aplicar >= 50 ? "50–74%" : v.chance_ao_aplicar >= 25 ? "25–49%" : "0–24%";
+  const fonteCurta = (v) => v.fonte.startsWith("GitHub") ? "GitHub (BR)" : v.fonte.replace(/ \(.+\)$/, "");
+  const fontesCount = new Map();
+  for (const v of encontradas) fontesCount.set(fonteCurta(v), (fontesCount.get(fonteCurta(v)) ?? 0) + 1);
+
+  $("#graficos").innerHTML = [
+    graficoBarras("Funil de candidaturas", "Quantas chegaram a cada etapa", apps.length ? [
+      { rotulo: "Aplicadas", valor: apps.length },
+      { rotulo: "Responderam", valor: resp.length },
+      { rotulo: "Retorno positivo", valor: positivos.length },
+      { rotulo: "Entrevista", valor: entrevistas.length },
+      { rotulo: "Proposta", valor: apps.filter((v) => v.status === "proposta").length },
+    ] : [], { modo: "contagem", vazio: vazioApps }),
+    graficoBarras("Retorno x idade da vaga ao aplicar", "Aplicar cedo realmente ajuda? Taxa de resposta por quanto tempo a vaga tinha", taxaPor(apps, faixaIdade, ["< 24h", "1 a 3 dias", "3 a 7 dias", "> 7 dias"]), { vazio: vazioApps }),
+    graficoBarras("Retorno x chance estimada", "Se a nota de chance funciona, as faixas altas devem responder mais", taxaPor(apps, faixaChance, ["75–100%", "50–74%", "25–49%", "0–24%"]), { vazio: vazioApps }),
+    graficoBarras("Retorno por fonte", "Onde vale mais a pena procurar", taxaPor(apps, fonteCurta, []), { vazio: vazioApps }),
+    graficoBarras("Retorno por tipo de vaga", "Qual currículo/papel está convertendo melhor", taxaPor(apps, (v) => v.papel, ["fullstack", "frontend", "backend", "mobile", "java"]), { vazio: vazioApps }),
+    graficoBarras("Vagas no radar por fonte", "Vagas ativas que passaram no filtro", [...fontesCount].sort((a, b) => b[1] - a[1]).map(([rotulo, valor]) => ({ rotulo, valor })), { modo: "contagem", vazio: "Nenhuma vaga ainda." }),
+    graficoDias("Candidaturas por dia", "Últimos 30 dias", apps),
+  ].join("");
+}
+
+// ---------------------------------------------------------------- aba LinkedIn
+async function carregarLinkedin() {
+  const { sites } = await (await fetch("/api/buscas-manuais")).json();
+  $("#lkLinks").innerHTML = sites.map((s) => `
+    <div style="margin-top:10px"><div style="font-weight:600;font-size:13px;margin-bottom:5px">${esc(s.site)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${s.links.map((l) => `<a class="chip" style="text-decoration:none;font-size:13px;padding:4px 11px" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.busca)} ↗</a>`).join("")}</div></div>`).join("");
+}
+
+$("#formManual").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const corpo = {
+    fonte: f.fonte.value, url: f.url.value, titulo: f.titulo.value, empresa: f.empresa.value,
+    horas: f.horas.value, texto: f.texto.value, remoto: f.remoto.checked, status: f.status.value,
+  };
+  const r = await (await fetch("/api/vagas/manual", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) })).json();
+  if (r.erro) {
+    $("#manualStatus").textContent = r.erro;
+    return;
+  }
+  $("#manualStatus").textContent = `Adicionada: chance ${r.vaga.chance}% · aderência ${r.vaga.aderencia} · ${r.vaga.papel}. Está na aba ${r.vaga.status === "nova" ? "Vagas" : "Candidaturas"}.`;
+  f.reset();
+  f.horas.value = 1;
+  carregar();
+});
+
+// ---------------------------------------------------------------- aba Meus dados
+let PERFIL = { grupos: [], valores: {} };
+
+async function carregarPerfil() {
+  PERFIL = await (await fetch("/api/perfil")).json();
+  const f = $("#formPerfil");
+  f.innerHTML = PERFIL.grupos.map((g) => `
+    <section class="grafico" style="margin-bottom:12px">
+      <h3 style="margin-bottom:10px">${esc(g.titulo)}</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(${g.campos.some((c) => c.tipo === "texto") ? 460 : 260}px,1fr));gap:10px 16px">
+        ${g.campos.map((c) => {
+          const v = PERFIL.valores[c.id] ?? "";
+          const campo = c.tipo === "texto"
+            ? `<textarea name="${c.id}" rows="5" style="width:100%;border:1px solid var(--border);background:var(--surface-1);border-radius:8px;padding:8px;font:inherit;color:inherit;resize:vertical">${esc(v)}</textarea>`
+            : c.tipo === "opcoes"
+              ? `<select name="${c.id}" style="flex:1"><option value=""></option>${c.opcoes.map((o) => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>`
+              : `<input name="${c.id}" value="${esc(v)}" style="flex:1;min-width:0;border:1px solid var(--border);background:var(--surface-1);border-radius:8px;padding:6px 10px">`;
+          return `<label style="display:block"><span style="font-size:12px;color:var(--text-secondary)">${esc(c.rotulo)}</span>
+            <div style="display:flex;gap:6px;align-items:flex-start;margin-top:3px">${campo}<button type="button" data-copiar="${c.id}" title="Copiar">Copiar</button></div></label>`;
+        }).join("")}
+      </div>
+    </section>`).join("");
+  atualizarBookmarklet();
+}
+
+function lerFormPerfil() {
+  const dados = {};
+  for (const el of $("#formPerfil").querySelectorAll("[name]")) dados[el.name] = el.value.trim();
+  return dados;
+}
+
+$("#btnSalvarPerfil").onclick = async () => {
+  const r = await fetch("/api/perfil", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lerFormPerfil()) });
+  PERFIL.valores = (await r.json()).valores;
+  atualizarBookmarklet();
+  $("#perfilStatus").textContent = `Salvo às ${new Date().toLocaleTimeString("pt-BR")}. Arraste o botão "Preencher formulário" de novo para atualizar o favorito.`;
+};
+$("#formPerfil").addEventListener("input", () => ($("#perfilStatus").textContent = "Alterações não salvas"));
+$("#formPerfil").addEventListener("click", async (e) => {
+  const id = e.target.dataset?.copiar;
+  if (!id) return;
+  e.preventDefault();
+  const el = $("#formPerfil").querySelector(`[name="${id}"]`);
+  await navigator.clipboard.writeText(el.value);
+  e.target.textContent = "✓";
+  setTimeout(() => (e.target.textContent = "Copiar"), 1200);
+});
+
+function atualizarBookmarklet() {
+  const p = PERFIL.valores;
+  // Campos sensíveis (CPF) ficam fora do favorito: favoritos sincronizam com a conta da Microsoft/Google.
+  const sensiveis = new Set(PERFIL.grupos.flatMap((g) => g.campos).filter((c) => c.sensivel).map((c) => c.id));
+  const regras = regrasDoPerfil(PERFIL.grupos, Object.fromEntries(Object.entries(p).filter(([k]) => !sensiveis.has(k))));
+  // Favorito não sabe qual vaga é: leva os textos genéricos (o botão "Aplicar" do painel leva os da vaga).
+  const textos = [
+    ["Sobre mim (PT)", p.sobre_pt], ["About me (EN)", p.sobre_en], ["Maior desafio", p.maior_desafio],
+    ["Por que esta empresa (modelo)", p.por_que_empresa], ["Carta base (PT)", p.carta_base_pt], ["Cover letter (EN)", p.carta_base_en],
+    ["Pretensão", [p.pretensao_clt && `CLT: R$ ${p.pretensao_clt}/mês`, p.pretensao_pj && `PJ: R$ ${p.pretensao_pj}/mês`].filter(Boolean).join(" · ")],
+  ].filter(([, t]) => t);
+  const codigo = `(${kitCandidatura.toString()})(${JSON.stringify({ regras, textos })})`;
+  $("#bookmarklet").href = `javascript:${encodeURIComponent(codigo)}`;
+  $("#bmInfo").textContent = `${regras.length} campo(s) com valor`;
+}
+
+document.addEventListener("mousemove", (e) => {
+  const alvo = e.target.closest?.("[data-tip]");
+  if (alvo) mostrarTip(e, alvo.dataset.tip);
+  else esconderTip();
+});
+
+carregar();
+setInterval(() => { if (!D.buscando) carregar(); }, 60000);
+</script>
+</body>
+</html>
